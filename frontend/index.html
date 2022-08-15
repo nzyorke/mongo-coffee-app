@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <title>MongDB Coffee Ordering</title>
+</head>
+
+<body>
+    <h1>Coffee Ordering app</h1>
+    <div id="tools">
+        <!-- forms are way we can wrap inputs -->
+        <!-- if we dont add js void, the page will refresh when you submit the form -->
+        <form id="add-coffee-form" action="javascript:void(0)">
+            <label for="name-input">Name: </label>
+            <input id="name-input" name="name-input" type="text">
+            <label for="price-input">Price: </label>
+            <input id="price-input" name="price-input" type="number">
+            <label for="image-url-input">Image URL</label>
+            <input id="image-url-input" name="image-url-input" type="text">
+            <button id="coffee-button">Go</button>
+        </form>
+    </div>
+    <div id="result"></div>
+    
+ <!-- jquery -->
+ <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+ integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="js/script.js"></script>
+</body>
+
+</html>

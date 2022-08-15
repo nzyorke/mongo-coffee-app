@@ -1,0 +1,24 @@
+h1{
+    font-family: ariel;
+}
+
+body{
+    padding: 30px;
+    background-color: papayawhip;
+}
+
+#result{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+#result img{
+  width: 100%;
+  height: 75%;
+  object-fit: cover;
+}
+
+#add-coffee-form{
+    margin-bottom: 20px;
+}
