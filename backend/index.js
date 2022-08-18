@@ -7,6 +7,8 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 // This is our middleware for talking to mongoDB
 const mongoose = require("mongoose");
+// bcrypt for encrypting data (passwrords)
+const bcrypt = require('bcryptjs');
 // grab our config file
 const config = require('./config.json')
 console.log(config)
@@ -14,6 +16,7 @@ console.log(config)
 // Schemas
 // every schema needs a capital letter
 const Coffee = require("./models/coffee.js");
+const User = require("./models/user.js");
 
 // start our dependencies
 app.use(bodyParser.json())
@@ -41,6 +44,10 @@ mongoose.connect(
     console.log(`DB connection error ${err.message}`)
 })
 
+// ====================
+//       ADD Method
+// ====================
+
 // set up a route/endpoint which the frontend will access 
 // app.post will send data to the database 
 app.post(`/addCoffee`, (req, res) => {
@@ -65,6 +72,11 @@ app.post(`/addCoffee`, (req, res) => {
         })
 });
 
+
+// ===================
+//      GET Method
+// ===================
+
 // here we are setting up the /allCoffee route
 app.get('/allCoffee', (req, res) => {
   // .then is method in which we can chain functions on
@@ -77,3 +89,106 @@ app.get('/allCoffee', (req, res) => {
           res.send(result)
   })
 })
+
+// =====================
+//     DELETE Method
+// ====================
+
+// set up the delete route
+// This route will only be actived if someone goes to it
+// you can go to it using AJAX
+app.delete('/deleteCoffee/:id', (req, res) => {
+// the request varible here (req) contains the ID, and you can access it using req.param.id
+const coffeeId = req.params.id;
+console.log("The following coffee was deleted:")
+console.log(coffeeId);
+// findById() looks up a piece of data based on the id aurgument which we give it first
+// we're giving it the coffee ID vairiblew 
+//  if it successful it will run a function
+// then function will provide us the details on that coffee or an error if it doesn't work
+Coffee.findById(coffeeId, (err, coffee) => {
+  if (err) {
+    console.log(err)
+  } else {
+    console.log(coffee);
+    Coffee.deleteOne({ _id: coffeeId })
+    .then(() => {
+      console.log("Success! Actually deleted from mongoDB")
+      // res.send will end the process
+      res.send(coffee)
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+  }
+
+});
+});
+
+// ====================
+//      EDIT Method
+// ====================
+
+app.patch('/updateProduct/:id', (req, res) => {
+  const idParam = req.params.id;
+  Coffee.findById(idParam, (err, coffee) => {
+    const updatedProduct = {
+      name: req.body.name,
+      price: req.body.price,
+      image_url: req.body.image_url
+    }
+    Coffee.updateOne({
+      _id: idParam
+    }, updatedProduct).
+    then(result => {
+      res.send(result);
+    }).catch(err => res.send(err));
+  })
+})
+
+// =======================
+//      Registering users
+// =======================
+app.post('/registerUser',(req, res)=>{ // Checking if user is in the DB already
+  
+  User.findOne({username:req.body.username}, (err, userResult)=>{
+
+    if(userResult){
+      // send back a string so we can validate the user
+      res.send('username exists');
+    } else {
+      const hash = bcrypt.hashSync(req.body.password); // Encrypt User Password
+      const user = new User({
+        _id: new mongoose.Types.ObjectId,
+        username: req.body.username,
+        password: hash,
+        profile_img_url: req.body.profile_img_url
+      });
+      
+      user.save().then(result=>{ // Save to database and notify userResult
+        res.send(result);
+      }).catch(err=>res.send(err));
+    } // Else
+  })
+}) // End of Create Account
+
+// Logging in
+
+// ============
+//     Log In
+// =============
+app.post('/loginUser', (req, res)=>{
+  // firstly look for a user with that username
+  User.findOne({username:req.body.username}, (err, userResult) => {
+    if (userResult){
+      if(bcrypt.compareSync(req.body.password, userResult.password)){
+        res.send(userResult);
+      } else{
+        res.send('not authorised');
+      } // inner if
+    } else{
+      res.send('user not found');
+    } // outer if
+  }) // Find one ends
+}); // end of post login
+
